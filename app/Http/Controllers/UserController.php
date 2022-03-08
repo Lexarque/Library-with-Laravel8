@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException as ExceptionsJWTExceptions;
 use Tymon\JWTAuth\Facades\JWTAuth as FacadesJWTAuth;
@@ -15,6 +16,8 @@ class UserController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
+        $role = DB::table('users')->where('email', $credentials)->value('role');
+
         try {
             if(! $token = FacadesJWTAuth::attempt($credentials))
             {
@@ -24,7 +27,7 @@ class UserController extends Controller
         {
             return response()->json(['error' => 'could_not_create_token', 500]);
         }
-        return response()->json(compact('token'));
+        return response()->json([compact('token'), 'role' => $role,'status' => 1]);
     }
 
     public function register(Request $request)
@@ -34,6 +37,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
+            'role' => 'required|string|max:12'
         ]);
         
         if($validator->fails())
@@ -45,10 +49,11 @@ class UserController extends Controller
             'name' => $request->get('name'),
             'email' => $request->get('email'),
             'password' => Hash::make($request->get('password')),
+            'role' => $request->get('role')
         ]);
         
         $token = FacadesJWTAuth::fromUser($user);
-        return response()->json(['token' => 'compact'],201);
+        return response()->json([compact('user', 'token'), 'status' => 1], 201);
     
     }
 
@@ -72,7 +77,7 @@ class UserController extends Controller
         {
             return response()->json(['token_absent'], 401);
         }
-        return response()->json(compact('user'));
+        return response()->json([compact('user'), 'status' => 1]);
     }
 
     

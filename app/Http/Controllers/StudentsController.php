@@ -15,10 +15,10 @@ class StudentsController extends Controller
 
     public function detail($id)
     {
-        if(Students::where('$id_students', $id)->exists())
+        if(Students::where('id_students', $id)->exists())
         {
-            $data_students = Students::join('StudentClass','StudentClass.id_student_class', 
-            'Students.id_student_class')->where('Students.id_students', $id)->get();
+            $data_students = Students::join('student_class','student_class.id_student_class', 
+            'students.id_student_class')->where('students.id_students', $id)->get();
             
             return Response()->json($data_students);
         }else

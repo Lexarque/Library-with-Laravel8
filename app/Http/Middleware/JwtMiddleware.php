@@ -34,7 +34,7 @@ class JwtMiddleware
                 return response()->json(['status' => 'Authorization Token not found']);
             }
         }
-        if($user && in_array($user->type, $role)){
+        if($user && in_array($user->role, $role)){
             return $next($request);
         }else{
             return response()->json(['message' => 'Invalid Role'], 404);

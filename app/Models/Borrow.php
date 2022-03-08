@@ -10,5 +10,5 @@ class Borrow extends Model
     protected $table = 'borrow';
     public $timestamps = false;
 
-    protected $fillable = ['date_borrow', 'id_students'];
+    protected $fillable = ['date_borrow', 'id_students', 'id_book'];
 }

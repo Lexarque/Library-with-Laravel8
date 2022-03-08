@@ -18,7 +18,7 @@ class BorrowController extends Controller
         if(Borrow::where('id_borrow', $id)->exists())
         {
             $data_Borrow = Borrow::join('students','students.id_students', 
-            'borrow.id_students')->where('borrow.id_borrow', $id)->get();
+            'borrow.id_students')->join('book', 'book.book_name', 'borrow.book_name')->where('borrow.id_borrow', $id)->get();
             
             return Response()->json($data_Borrow);
         }else
@@ -32,7 +32,8 @@ class BorrowController extends Controller
         $validator=Validator::make($request->all(),
         [
             'date_borrow' => 'required',
-            'id_students' => 'required'
+            'id_students' => 'required',
+            'id_book' => 'required'
             ]);
  
             if($validator->fails()) 
@@ -40,10 +41,11 @@ class BorrowController extends Controller
                 return Response()->json($validator->errors());
             }
             
-            $update = Borrow::where('id_Borrow', $id)->update
+            $update = Borrow::where('id_borrow', $id)->update
             ([
                 'date_borrow' => $request->date_borrow,
-                'id_students' => $request->id_students
+                'id_students' => $request->id_students,
+                'id_book' => $request->id_book
     
             ]);
             if($update) 
@@ -61,7 +63,8 @@ class BorrowController extends Controller
         $validator=Validator::make($request->all(),
         [
             'date_borrow' => 'required',
-            'id_students' => 'required'
+            'id_students' => 'required',
+            'id_book' => 'required'
         ]
         );
         
@@ -71,7 +74,8 @@ class BorrowController extends Controller
 
         $store = Borrow::create([
             'date_borrow' => $request->date_borrow,
-            'id_students' => $request->id_students
+            'id_students' => $request->id_students,
+            'id_book' => $request->id_book
 
         ]);
         if($store)
