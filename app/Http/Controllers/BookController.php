@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 use App\Models\Book;
 
 class BookController extends Controller
@@ -19,10 +20,10 @@ class BookController extends Controller
         {
             $data_book = Book::where('book.id_book', $id)->get();
             
-            return Response()->json($data_book);
+            return Response()->json(['status' => 1, $data_book, 'message' => 'id found']);
         }else
         {
-            return Response()->json(['Message' => 'Not Found']);
+            return Response()->json(['status' => 0,'Message' => 'Not Found']);
         }
     }
 
@@ -49,11 +50,11 @@ class BookController extends Controller
             ]);
             if($update) 
             {
-                return Response()->json(['status' => 1]);
+                return Response()->json(['status' => 1, 'message' => 'update successful !']);
             }
             else 
             {
-                return Response()->json(['status' => 0]);
+                return Response()->json(['status' => 0, 'message' => 'update failed !']);
             }
         }
     
@@ -80,11 +81,11 @@ class BookController extends Controller
         ]);
         if($store)
         {
-            return Response()->json(['status' => 1]);
+            return Response()->json(['status' => 1, 'message' => 'add successful !']);
         }
         else
         {
-            return Response()->json(['status' => 0]);
+            return Response()->json(['status' => 0, 'message' => 'add failed']);
         }
     }
 
@@ -94,11 +95,42 @@ class BookController extends Controller
         
         if($delete) 
         {
-            return Response()->json(['status' => 1]);
+            return Response()->json(['status' => 1, 'message' => 'delete successful !']);
         }
         else 
         {
-            return Response()->json(['status' => 0]);
+            return Response()->json(['status' => 0, 'message' => 'delete failed !']);
+        }
+    }
+
+    public function upload_image($id, Request $req){
+        $validator=Validator::make($req->all(),
+        [
+            'book_cover' => 'required|image|mimes:jpeg,png,jpg|max:5120'
+        ]);
+
+        if($validator->fails()){
+            return Response() -> json($validator->errors());
+        }
+
+        $imageName = time().".".$req->book_cover->extension();
+        $req->book_cover->move(public_path('images'), $imageName);
+
+        $update=DB::table('book')->where('id_book', $id)->update(['image' => $imageName]);
+
+        $data = DB::table('book')->where('id_book', $id)->get();
+        
+        if($update){
+            return Response()->json([
+                'status' => 1,
+                'message' => 'Success upload book cover!',
+                'data' => $data
+            ]);
+        }else{
+            return Response()->json([
+                'status' => 0,
+                'message' => 'Failed upload book cover',
+            ]);
         }
     }
 }

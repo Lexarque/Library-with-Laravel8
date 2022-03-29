@@ -4,13 +4,26 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Students;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class StudentsController extends Controller
 {
     public function show()
     {   
-        return Students::all();
+        $data = DB::table('students')->join('student_class','student_class.id_student_class', 
+        'students.id_student_class')->select('students.*', 'student_class.*')->get();
+        if($data->isEmpty()){
+            return response()->json([
+                'status' => 0,
+                'message' => 'Students table is empty'
+                ], 404);
+        }else{
+            return Response()->json([
+                'status' => 1,
+                'data' => $data
+                ], 200);
+        }
     }
 
     public function detail($id)
@@ -20,11 +33,24 @@ class StudentsController extends Controller
             $data_students = Students::join('student_class','student_class.id_student_class', 
             'students.id_student_class')->where('students.id_students', $id)->get();
             
-            return Response()->json($data_students);
+            return Response()->json(['status' => 1, 'data' => $data_students]);
         }else
         {
-            return Response()->json(['Message' => 'Not Found']);
+            return Response()->json(['status' => 1, 'Message' => 'Not Found']);
         }
+    }
+
+    public function search_by_name($name){
+        if(Students::where('name_students', 'like', '%'.$name.'%')->exists()){
+            
+            $data = DB::table('students')->join('student_class','student_class.id_student_class', 
+            'students.id_student_class')->select('students.*', 'student_class.*')->where('name_students', 'like', '%'.$name.'%')->get();
+            
+            return Response()->json(['status' => 1, 'data' => $data]);
+        }else{
+            return Response()->json(['status' => 0, 'Message' => 'Not Found']);
+        }
+        
     }
 
     public function update($id, Request $request)
@@ -102,11 +128,11 @@ class StudentsController extends Controller
         
         if($delete) 
         {
-            return Response()->json(['status' => 1]);
+            return Response()->json(['status' => 1, 'message' => 'Successfully deleted']);
         }
         else 
         {
-            return Response()->json(['status' => 0]);
+            return Response()->json(['status' => 0, 'message' => 'Failed to delete']);
         }
     }
 }

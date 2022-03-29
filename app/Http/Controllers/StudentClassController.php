@@ -5,12 +5,24 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\StudentClass;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 class StudentClassController extends Controller
 {
     public function show()
     {
-        return StudentClass::all();
+        $data = DB::table('student_class')->get();
+        if($data->isEmpty()){
+            return response()->json([
+                'status' => 0,
+                'message' => 'StudentClass table is empty'
+                ], 404);
+            }else{
+                return Response()->json([
+                    'status' => 1,
+                    'data' => $data
+                    ], 200);
+            }
     }
 
     public function detail($id)
