@@ -4,7 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Borrow;
+use Facade\FlareClient\Http\Response;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Carbon;
 
 class BorrowController extends Controller
 {
@@ -31,7 +34,6 @@ class BorrowController extends Controller
     {
         $validator=Validator::make($request->all(),
         [
-            'date_borrow' => 'required',
             'id_students' => 'required',
             'id_book' => 'required'
             ]);
@@ -40,21 +42,24 @@ class BorrowController extends Controller
             {
                 return Response()->json($validator->errors());
             }
+
+            $current_time = Carbon::now();
             
             $update = Borrow::where('id_borrow', $id)->update
             ([
-                'date_borrow' => $request->date_borrow,
+                'date_borrow' => $current_time,
+                'date_due' => $current_time->addDays(7),
                 'id_students' => $request->id_students,
                 'id_book' => $request->id_book
     
             ]);
             if($update) 
             {
-                return Response()->json(['status' => 1]);
+                return Response()->json(['status' => 1, 'data' => $update]);
             }
             else 
             {
-                return Response()->json(['status' => 0]);
+                return Response()->json(['status' => 0, 'data'=>$update]);
             }
         }
     
@@ -62,7 +67,6 @@ class BorrowController extends Controller
     {
         $validator=Validator::make($request->all(),
         [
-            'date_borrow' => 'required',
             'id_students' => 'required',
             'id_book' => 'required'
         ]
@@ -72,19 +76,23 @@ class BorrowController extends Controller
             return Response()->json($validator->errors());
         }
 
+        $current_time = Carbon::now();
+        $due_date = Carbon::now()->addDays(7);
+
         $store = Borrow::create([
-            'date_borrow' => $request->date_borrow,
+            'date_borrow' => $current_time,
+            'date_due' => $due_date,
             'id_students' => $request->id_students,
             'id_book' => $request->id_book
 
         ]);
         if($store)
         {
-            return Response()->json(['status' => 1]);
+            return Response()->json(['status' => 1, 'data'=>$store]);
         }
         else
         {
-            return Response()->json(['status' => 0]);
+            return Response()->json(['status' => 0, 'data'=>$store]);
         }
     }
 
