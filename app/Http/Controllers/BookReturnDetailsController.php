@@ -5,13 +5,25 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\BookReturnDetails;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
 
 
 class BookReturnDetailsController extends Controller
 {
     public function show()
     {
-        return BookReturnDetails::all();
+        $data = DB::table('return_details')->join('book_return', 'book_return.id_book_return', 'return_details.id_book_return')->join('book', 'book.id_book', 'return_details.id_book')->select('return_details.*', 'book_return.*', 'book.name_book', 'book.author_book')->get();
+        if($data->isEmpty()){
+            return response()->json([
+                'status' => 0,
+                'message' => 'BookReturnDetails table is empty'
+                ], 404);
+        }else{
+            return Response()->json([
+                'status' => 1,
+                'data' => $data
+                ], 200);
+        }
     }
 
     public function detail($id)

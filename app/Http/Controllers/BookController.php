@@ -81,7 +81,7 @@ class BookController extends Controller
         ]);
         if($store)
         {
-            return Response()->json(['status' => 1, 'message' => 'add successful !']);
+            return Response()->json(['status' => 1, 'message' => 'add successful']);
         }
         else
         {

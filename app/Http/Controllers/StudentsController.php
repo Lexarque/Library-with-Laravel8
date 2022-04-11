@@ -135,4 +135,36 @@ class StudentsController extends Controller
             return Response()->json(['status' => 0, 'message' => 'Failed to delete']);
         }
     }
+
+    public function upload_image($id, Request $req){
+        
+        $validator=Validator::make($req->all(),
+        [
+            'photo_students' => 'required|image|mimes:jpeg,png,jpg|max:5120'
+        ]);
+
+        if($validator->fails()){
+            return Response() -> json($validator->errors());
+        }
+
+        $imageName = time().".".$req->photo_students->extension();
+        $req->photo_students->move(public_path('images'), $imageName);
+
+        $update=DB::table('students')->where('id_students', $id)->update(['photo_students' => $imageName]);
+
+        $data = DB::table('students')->where('id_students', $id)->get();
+        
+        if($update){
+            return Response()->json([
+                'status' => 1,
+                'message' => 'Success upload student photo!',
+                'data' => $data
+            ]);
+        }else{
+            return Response()->json([
+                'status' => 0,
+                'message' => 'Failed upload student photo',
+            ]);
+        }
+    }
 }

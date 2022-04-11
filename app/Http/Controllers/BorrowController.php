@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Borrow;
+use App\Models\BookBorrowDetails;
 use Facade\FlareClient\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
@@ -21,7 +22,7 @@ class BorrowController extends Controller
         if(Borrow::where('id_borrow', $id)->exists())
         {
             $data_Borrow = Borrow::join('students','students.id_students', 
-            'borrow.id_students')->join('book', 'book.book_name', 'borrow.book_name')->where('borrow.id_borrow', $id)->get();
+            'borrow.id_students')->where('borrow.id_borrow', $id)->get();
             
             return Response()->json($data_Borrow);
         }else
@@ -34,8 +35,7 @@ class BorrowController extends Controller
     {
         $validator=Validator::make($request->all(),
         [
-            'id_students' => 'required',
-            'id_book' => 'required'
+            'id_students' => 'required'
             ]);
  
             if($validator->fails()) 
@@ -50,7 +50,6 @@ class BorrowController extends Controller
                 'date_borrow' => $current_time,
                 'date_due' => $current_time->addDays(7),
                 'id_students' => $request->id_students,
-                'id_book' => $request->id_book
     
             ]);
             if($update) 
@@ -68,10 +67,9 @@ class BorrowController extends Controller
         $validator=Validator::make($request->all(),
         [
             'id_students' => 'required',
-            'id_book' => 'required'
-        ]
-        );
-        
+            'detail' => 'required'
+        ]);
+
         if($validator->fails()) {
             return Response()->json($validator->errors());
         }
@@ -82,17 +80,25 @@ class BorrowController extends Controller
         $store = Borrow::create([
             'date_borrow' => $current_time,
             'date_due' => $due_date,
-            'id_students' => $request->id_students,
-            'id_book' => $request->id_book
+            'id_students' => $request->id_students
 
         ]);
-        if($store)
+
+        for($i = 0; $i < count($request->detail); $i++){
+            $borrow_detail = new BookBorrowDetails();
+            $borrow_detail->id_borrow = $store->id_borrow;
+            $borrow_detail->id_book = $request->detail[$i]['id_book'];
+            $borrow_detail->qty = $request->detail[$i]['qty'];
+            $borrow_detail->save();
+        }
+
+        if($store && $borrow_detail)
         {
-            return Response()->json(['status' => 1, 'data'=>$store]);
+            return Response()->json(['status' => 1, 'message' => 'Success']);
         }
         else
         {
-            return Response()->json(['status' => 0, 'data'=>$store]);
+            return Response()->json(['status' => 0, 'message' => 'Failed']);
         }
     }
 
