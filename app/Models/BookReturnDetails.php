@@ -11,5 +11,5 @@ class BookReturnDetails extends Model
     protected $primaryKey = 'id_return_details';
     public $timestamps = false;
 
-    protected $fillable = ['qty', 'id_borrow', 'id_book'];
+    protected $fillable = ['qty', 'id_book_return', 'id_book'];
 }

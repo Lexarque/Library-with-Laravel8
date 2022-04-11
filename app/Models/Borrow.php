@@ -11,5 +11,5 @@ class Borrow extends Model
     protected $primaryKey = 'id_borrow';
     public $timestamps = false;
 
-    protected $fillable = ['date_borrow', 'date_due','id_students', 'id_book'];
+    protected $fillable = ['date_borrow', 'date_due','id_students'];
 }
