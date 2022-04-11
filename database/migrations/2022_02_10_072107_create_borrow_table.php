@@ -17,11 +17,9 @@ class CreateBorrowTable extends Migration
             $table->id('id_borrow');
             $table->date('date_borrow');
             $table->date('date_due');
-            $table->unsignedBigInteger('id_book');
             $table->unsignedBigInteger('id_students');
 
             $table->foreign('id_students')->references('id_students')->on('students');
-            $table->foreign('id_book')->references('id_book')->on('book');
         });
     }
 
